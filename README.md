@@ -1,62 +1,108 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Projekt aplikacji bankowej - LaraBank
 
-## About Laravel
+## Środowisko
+**Wersja PHP** : 7.3
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Projekt aplikacji bankowej został wykonany w oparciu o framework Laravel w wersji 8.21. Do budowy layoutu wykorzystano framework Tailwind CSS, a sam panel klienta w oparciu o Jetstream i Livewire.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Do budowy panelu administracyjnego wykorzystano otwarto-źródłowego Voyagera.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Mapa strony
+**Użytkownik niezalogowany**:
+- / — Strona główna
+- /login — Logowanie
+- /register — Rejestracja
+**Użytkownik zalogowany**:
+- /dashboard — Panel klienta
+- /produkty-bankowe — Strona z produktami bankowymi dostępnymi dla Klienta
+- /user/profile — Zarządzanie swoim profilem
 
-## Learning Laravel
+**Zarządzanie (Panel administratorski)**:
+- /admin — Admin Panel
+- /users — Użytkownicy
+- /transactions — Przelewy
+- /operations — Operacje
+- /client-bank-products — Produkty bankowe klientów
+- /bank-products — Produkty bankowe
+- /bank-products-types — Typy produktów bankowych
+- /bank-codes — Kody banków
+- /operation-types — Typy operacji
+- /voivodeships — Województwa
+- oraz pozostałe widoczne w menu pod Administracja
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Diagram bazy danych
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+<a href="https://ibb.co/pfdQK8M"><img src="https://i.ibb.co/m940yw2/Diagram-bazy-danych-larabank.png" alt="Diagram-bazy-danych-larabank" border="0"></a>
 
-## Laravel Sponsors
+### Istotne tabele
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+- bank_codes — tabela zawierająca kody banków na potrzeby wyświetlania nazwy banku, do którego klient wysyła przelew.
+- bank_products — tabela zawierająca produkty bankowe dostępne w ofercie banku.
+- bank_products_types — tabela zawierająca typy ww. produktów bankowych.
+- client_bank_products — tabela zawierająca produkty bankowe klientów. Jeden klient może posiadać wiele produktów bankowych.
+- operation_statuses — tabela zawierająca statusy operacji.
+- operation_types — tabela zawierająca typy operacji.
+- operations — tabela zawierające operacje wykonywane na rachunkach przez klientów.
+- roles — tabela zawierająca role, jakie mogą zostać przypisane użytkownikom.
+- transactions — tabela zawierające dane o wykonywanych przelewach.
+- users  — tabela zawierająca dane o użytkownikach.
+- voivodeships — tabela zawierająca województwa dostępne do wyboru.
 
-### Premium Partners
+## Krótki opis ważniejszych relacji
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/)**
-- **[OP.GG](https://op.gg)**
+**Produkty bankowe**
+Produkty bankowe dodawane są w panelu administracyjnym. Klient ma możliwość aktywacji każdego z tych produktów. Tworzony wtedy jest produkt bankowy klienta w tabeli `client_bank_products` zawierający wygenerowany numer rachunku `iban`, saldo `balance` i relacje do produktu bankowego `bank_product_id` oraz użytkownika - klienta `user_id`. Zastosowany mechanizm umożliwia aktywację kilku tych samych produktów bankowych przez klienta.
+**Operacje**
+Mechanizm aplikacji został zaprojektowany tak, że każdy przelew to operacja. Operacja może być różnego typu. Wraz z tworzoną operacją, tworzony jest powiązany przelew (relacja `belongsTo`). Zostało to tak przygotowane, gdyby operacją nie był przelew, a na przykład doładowanie telefonu (obecnie niewspierane). 
 
-## Contributing
+Każda nowa operacja zawiera typ operacji `operation_type_id`, informację z którego rachunku jest wykonywana `from_bank_account_id`, informację na jaki rachunek jest wykonywana `to_bank_account_id` (jeśli operacja jest między posiadanymi przez klienta rachunkami), powiązany przelew `transaction_id`, jej status `status_id` oraz zaplanowana data realizacji `scheduled_at`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Omówienie plików
 
-## Code of Conduct
+### App
+#### Controllers (app\Http)
+- `BankProductsController` - kontroler zwracający metodę index(), która zwraca widok strony Produkty bankowe w panelu klienta.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Livewire
+**Dashboard**:
+- `CreateOperation` - kontroler komponentu tworzenia operacji (Kliknięcie przycisku “Nowy przelew” w panelu klienta).
+- `Index` - kontroler komponentu strony głównej panelu klienta.
+- `Operations` - kontroler komponentu historii operacji.
+- `ShowOperationDetailsButton` - kontroler przycisku “Szczegóły” każdej operacji.
+- `ShowBankProduct` - kontroler komponentu dodawania produktu bankowego przez klienta.
+**Modele** (app\Models)
+Zgodnie ze wzorcem MVC, każda tabela posiada w Laravelu swój Model.
 
-## Security Vulnerabilities
+#### OMÓWIENIE WAŻNIEJSZYCH METOD
+**Akcesory (Accessors)** - metody zwracające preformatowane atrybuty 
+**ClientBankProduct**:
+- `getBalanceFrenchNotationAttribute()` — zwracająca balance sformatowany jako 0,00 zł.
+- `getFormattedIbanAttribute()` — zwracająca numer rachunku sformatowany jako 00 0000 0000 0000 0000 0000 0000.
+**Transaction**:
+- `getFormattedAmountAttribute()` — zwracająca amount (kwotę przelewu) sformatowaną jako 0,00 zł.
+- `getFormattedSenderIbanAttribute()` — zwracająca zwracająca numer rachunku nadawcy sformatowany jako 00 0000 0000 0000 0000 0000 0000.
+- `getFormattedRecipientIbanAttribute()` — zwracająca zwracająca numer rachunku nadawcy sformatowany jako 00 0000 0000 0000 0000 0000 0000.
+**User**:
+- `getFullNameAttribute()` — zwracająca pełne imię i nazwisko (first_name + last_name)
+- `getFullAddressAttribute()` — zwracająca pełny adres użytkownika (Ulica 00; 00-000 Miasto)
+**View**:
+- Components - w tym folderze zawarte są pliki komponentów Jetstream.
+- Voyager/Widgets - pliki widżetów na głównej stronie panelu administracyjnego.
+### RESOURCES
+**views**/
+- `api` - nieistotne dla projektu
+- `auth` - widoki powiązane z autoryzacją użytkowników
+- `client-panel` - widoki powiązane z panel klienta (jedna podstrona, więc tylko jeden blade)
+- `components` - widoki komponentów Jetstream uruchamiane <x-nazwa-komponentu/>
+- `layouts` - główny layout strony
+- `livewire` - widoki komponentów Livewire wywoływane poprzez @livewire(‘...’)
+- `profile` - widoki składowych edycji profilu w panelu klienta
+- `vendor` - nadpisane pliki poszczególnych funkcjonalności - personalizowane widoki Voyagera i Jetstream.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Licencja
 
-## License
+Projekt został wrzucony w celach edukacyjnych, a także w celu stworzenia portfolio własnych projektów.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Framework Laravel jest otwartoźródłowym oprogramowaniem licencjonowanych na zasadach licencji [MIT](https://opensource.org/licenses/MIT).
